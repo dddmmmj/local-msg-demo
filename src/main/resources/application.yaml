@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/local_msg?serverTimezone=UTC&useSSL=false&characterEncoding=utf8
+    username: root
+    password: 123456
+    druid:
+      initial-size: 5       # 初始连接数
+      min-idle: 5           # 最小空闲连接数
+      max-active: 20        # 最大连接数
+      max-wait: 60000       # 连接等待超时时间（毫秒）
+      time-between-eviction-runs-millis: 60000  # 间隔多久运行一次空闲连接回收
+      min-evictable-idle-time-millis: 300000   # 最小生存时间
+      validation-query: SELECT 1 FROM DUAL     # 心跳检测 SQL
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      pool-prepared-statements: true
+      max-pool-prepared-statement-per-connection-size: 20
+      filters: stat,wall,slf4j  # 监控统计、SQL防火墙、日志输出
+
+
+
+mybatis:
+
+  mapper-locations:
+    - "classpath:mapper/**/*Mapper.xml"
+  configuration:
+    mapUnderscoreToCamelCase: true

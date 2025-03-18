@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.ddmj.dao.LocalMessageDAO">
+
+    <sql id="BASE_COLUMN">id, req_snapshot, status, next_retry_time, retry_times, max_retry_times, fail_reason, create_time, update_time, deleted</sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO local_message (req_snapshot, status, next_retry_time, retry_times, max_retry_times, fail_reason)
+        VALUES (#{reqSnapshot}, #{status}, #{nextRetryTime}, #{retryTimes}, #{maxRetryTimes}, #{failReason})
+    </insert>
+
+    <update id="updateById">
+        UPDATE local_message
+        <set>
+            <if test="reqSnapshot != null and reqSnapshot != ''">req_snapshot = #{reqSnapshot},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="nextRetryTime != null">next_retry_time = #{nextRetryTime},</if>
+            <if test="retryTimes != null">retry_times = #{retryTimes},</if>
+            <if test="maxRetryTimes != null">max_retry_times = #{maxRetryTimes},</if>
+            <if test="failReason != null and failReason != ''">fail_reason = #{failReason},</if>
+            <if test="deleted != null">deleted = #{deleted},</if>
+        </set>
+        WHERE id = #{id}
+        AND deleted = 0
+    </update>
+
+    <select id="loadWaitRetryRecords" resultType="org.ddmj.entity.LocalMessageDO">
+        SELECT
+        <include refid="BASE_COLUMN"/>
+        FROM local_message
+        WHERE status IN
+        <foreach collection="status" item="status" open="(" separator="," close=")">
+            #{status}
+        </foreach>
+        AND next_retry_time &lt; #{nextRetryTime}
+        AND retry_times &lt; max_retry_times
+        AND create_time &lt; DATE_SUB(NOW(), INTERVAL #{retryIntervalMinutes} MINUTE)
+        AND deleted = 0
+    </select>
+
+</mapper>
